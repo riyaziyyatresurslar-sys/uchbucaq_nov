@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pifaqor Teoremi ilə Üçbucağın Növünün Müəyyən Edilməsi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 text-slate-800">
+
+    <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        
+        <!-- Başlıq və Rejim Seçimi -->
+        <div class="bg-slate-900 text-white p-5 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold tracking-tight">
+                    Tərəflərinə Görə Üçbucağın Növü
+                </h1>
+                <p class="text-slate-300 text-xs sm:text-sm mt-1">
+                    Pifaqor teoremi və düzbucaqlı üçbucaqla vizual müqayisə (c² və a² + b²)
+                </p>
+            </div>
+            
+            <!-- Rejim və Link Düymələri -->
+            <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <div class="flex bg-slate-800 p-1 rounded-xl">
+                    <button id="tabExplore" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow transition">
+                        Araşdırma
+                    </button>
+                    <button id="tabQuiz" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition">
+                        Özünü Yoxla
+                    </button>
+                </div>
+
+                <button id="copyLinkBtn" onclick="copyShareLink()" title="Simulyasiya linkini kopyala" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
+                    <span id="copyLinkText">Linki kopyala</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bildiriş Qutusu (Link kopyalandıqda) -->
+        <div id="toastMsg" class="hidden bg-emerald-600 text-white text-xs font-semibold text-center py-2 px-4 transition-all">
+            <!-- Dinamik mesaj -->
+        </div>
+
+        <!-- Əsas Məzmun Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12">
+            
+            <!-- SOL PANEL: Kanvas və Vizual Seçimlər -->
+            <div class="lg:col-span-7 bg-slate-50 border-b lg:border-b-0 lg:border-r border-slate-200 p-4 sm:p-6 flex flex-col justify-between">
+                
+                <!-- Üst Vizual Keçidlər (Toggles) -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <label class="inline-flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm text-xs font-medium text-slate-700 hover:bg-slate-50">
+                        <input type="checkbox" id="toggleRightRef" checked class="accent-indigo-600 w-4 h-4 rounded">
+                        <span>Düzbucaqla müqayisə (qırıq xətt)</span>
+                    </label>
+
+                    <label class="inline-flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm text-xs font-medium text-slate-700 hover:bg-slate-50">
+                        <input type="checkbox" id="toggleSquares" class="accent-indigo-600 w-4 h-4 rounded">
+                        <span>Kvadrat sahələri göstər</span>
+                    </label>
+
+                    <label class="inline-flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm text-xs font-medium text-slate-700 hover:bg-slate-50">
+                        <input type="checkbox" id="toggleAngle" checked class="accent-indigo-600 w-4 h-4 rounded">
+                        <span>Böyük bucağı göstər</span>
+                    </label>
+                </div>
+
+                <!-- Kanvas Sahəsi -->
+                <div class="w-full aspect-[4/3] max-h-[410px] bg-white rounded-xl border border-slate-200 relative flex items-center justify-center overflow-hidden shadow-inner">
+                    <canvas id="triCanvas" class="w-full h-full"></canvas>
+                    
+                    <!-- Əfsanə (Legend) -->
+                    <div id="canvasLegend" class="absolute bottom-2.5 left-3 right-3 flex flex-wrap items-center justify-between gap-2 text-[11px] bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-4 h-0.5 bg-indigo-600 inline-block"></span>
+                            <span>Verilmiş üçbucaq</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-4 h-0 border-t-2 border-dashed border-slate-400 inline-block"></span>
+                            <span>İdeal düzbucaqlı üçbucaq</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vizual İzah Qeydi -->
+                <div id="visualHint" class="mt-3 text-xs text-slate-600 bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 leading-relaxed">
+                    <!-- Dinamik izah -->
+                </div>
+            </div>
+
+            <!-- SAĞ PANEL: İdarəetmə və Hesablama -->
+            <div class="lg:col-span-5 p-5 sm:p-6 flex flex-col justify-between bg-white">
+                
+                <!-- REJİM 1: ARAŞDIRMA -->
+                <div id="explorePanel" class="space-y-5">
+                    
+                    <!-- Hazır Nümunələr -->
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">Hazır Nümunələr:</span>
+                        <div class="grid grid-cols-4 gap-1.5">
+                            <button onclick="setSides(6, 8, 10)" class="py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition">
+                                6, 8, 10<br><span class="text-[10px] font-normal">Düzbucaqlı</span>
+                            </button>
+                            <button onclick="setSides(6, 8, 9)" class="py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold transition">
+                                6, 8, 9<br><span class="text-[10px] font-normal">İti bucaqlı</span>
+                            </button>
+                            <button onclick="setSides(6, 8, 12)" class="py-1.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold transition">
+                                6, 8, 12<br><span class="text-[10px] font-normal">Kor bucaqlı</span>
+                            </button>
+                            <button onclick="setSides(4, 5, 10)" class="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition">
+                                4, 5, 10<br><span class="text-[10px] font-normal">Qurulmur</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tərəflərin Daxil Edilməsi -->
+                    <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <!-- Tərəf 1 -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-slate-700">1-ci tərəf:</span>
+                                <input type="number" id="num1" min="1" max="25" step="1" value="6" class="w-14 text-right font-bold text-indigo-600 bg-white border border-slate-300 rounded px-1.5 py-0.5">
+                            </div>
+                            <input type="range" id="range1" min="2" max="20" step="1" value="6" class="w-full accent-indigo-600 cursor-pointer">
+                        </div>
+
+                        <!-- Tərəf 2 -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-slate-700">2-ci tərəf:</span>
+                                <input type="number" id="num2" min="1" max="25" step="1" value="8" class="w-14 text-right font-bold text-indigo-600 bg-white border border-slate-300 rounded px-1.5 py-0.5">
+                            </div>
+                            <input type="range" id="range2" min="2" max="20" step="1" value="8" class="w-full accent-indigo-600 cursor-pointer">
+                        </div>
+
+                        <!-- Tərəf 3 -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-slate-700">3-cü tərəf:</span>
+                                <input type="number" id="num3" min="1" max="25" step="1" value="12" class="w-14 text-right font-bold text-rose-600 bg-white border border-slate-300 rounded px-1.5 py-0.5">
+                            </div>
+                            <input type="range" id="range3" min="2" max="25" step="1" value="12" class="w-full accent-rose-600 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Addım-addım Pifaqor Hesablaması -->
+                    <div id="calculationBox" class="space-y-3">
+                        <!-- JS ilə doldurulacaq -->
+                    </div>
+                </div>
+
+                <!-- REJİM 2: ÖZÜNÜ YOXLA (QUIZ) -->
+                <div id="quizPanel" class="hidden space-y-5">
+                    <div class="flex items-center justify-between">
+                        <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold">
+                            Sual #<span id="quizCount">1</span>
+                        </span>
+                        <span class="text-xs font-semibold text-slate-500">
+                            Xal: <strong id="quizScore" class="text-emerald-600">0</strong>
+                        </span>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                        <p class="text-xs text-slate-500 mb-2">Tərəfləri verilmiş üçbucağın növünü tapın:</p>
+                        <div id="quizSidesDisplay" class="text-2xl font-extrabold text-slate-900 tracking-wide">
+                            5, &nbsp; 7, &nbsp; 9
+                        </div>
+                    </div>
+
+                    <!-- 4 Cavab Variantı -->
+                    <div class="grid grid-cols-1 gap-2" id="quizOptions">
+                        <button onclick="checkQuizAnswer('acute')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
+                            <span>1. İti bucaqlı üçbucaq</span>
+                        </button>
+                        <button onclick="checkQuizAnswer('right')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
+                            <span>2. Düzbucaqlı üçbucaq</span>
+                        </button>
+                        <button onclick="checkQuizAnswer('obtuse')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
+                            <span>3. Kor bucaqlı üçbucaq</span>
+                        </button>
+                        <button onclick="checkQuizAnswer('invalid')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
+                            <span>4. Belə üçbucaq qurula bilməz</span>
+                        </button>
+                    </div>
+
+                    <!-- Quiz Rəyi və Həlli -->
+                    <div id="quizFeedback" class="hidden p-4 rounded-xl text-sm border">
+                        <!-- JS ilə dolacaq -->
+                    </div>
+
+                    <button id="nextQuizBtn" onclick="generateQuiz()" class="hidden w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm shadow transition">
+                        Növbəti Sual →
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elementləri
+        const canvas = document.getElementById('triCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const range1 = document.getElementById('range1');
+        const range2 = document.getElementById('range2');
+        const range3 = document.getElementById('range3');
+        const num1 = document.getElementById('num1');
+        const num2 = document.getElementById('num2');
+        const num3 = document.getElementById('num3');
+
+        const toggleRightRef = document.getElementById('toggleRightRef');
+        const toggleSquares = document.getElementById('toggleSquares');
+        const toggleAngle = document.getElementById('toggleAngle');
+        const calculationBox = document.getElementById('calculationBox');
+        const visualHint = document.getElementById('visualHint');
+
+        // Rejim Elementləri
+        const tabExplore = document.getElementById('tabExplore');
+        const tabQuiz = document.getElementById('tabQuiz');
+        const explorePanel = document.getElementById('explorePanel');
+        const quizPanel = document.getElementById('quizPanel');
+
+        let mode = 'explore';
+        let rawSides = [6, 8, 12];
+
+        // Quiz Vəziyyəti
+        let quizQuestion = { sides: [5, 7, 9], type: 'obtuse', answered: false };
+        let quizScore = 0;
+        let quizNumber = 1;
+
+        // Link kopyalama funksiyası
+        function copyShareLink() {
+            const url = window.location.href;
+            const toast = document.getElementById('toastMsg');
+            const btnText = document.getElementById('copyLinkText');
+
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            btnText.textContent = 'Kopyalandı!';
+            toast.classList.remove('hidden');
+
+            if (url.startsWith('http')) {
+                toast.textContent = '✓ Simulyasiya linki buferə kopyalandı! İstənilən yerdə paylaşa bilərsiniz.';
+            } else {
+                toast.textContent = '✓ Cari ünvan kopyalandı. Onlayn link üçün faylı GitHub Pages və ya Netlify-a yükləyin.';
+            }
+
+            setTimeout(() => {
+                btnText.textContent = 'Linki kopyala';
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        // Tərəfləri sinxronlaşdırmaq
+        function syncInputs(s1, s2, s3) {
+            rawSides = [s1, s2, s3];
+            range1.value = Math.min(20, s1); num1.value = s1;
+            range2.value = Math.min(20, s2); num2.value = s2;
+            range3.value = Math.min(25, s3); num3.value = s3;
+            updateSimulation();
+        }
+
+        function setSides(a, b, c) {
+            syncInputs(a, b, c);
+        }
+
+        [range1, range2, range3].forEach((el, idx) => {
+            el.addEventListener('input', () => {
+                rawSides[idx] = parseFloat(el.value);
+                [num1, num2, num3][idx].value = rawSides[idx];
+                updateSimulation();
+            });
+        });
+
+        [num1, num2, num3].forEach((el, idx) => {
+            el.addEventListener('input', () => {
+                let v = parseFloat(el.value);
+                if (isNaN(v) || v < 1) v = 1;
+                if (v > 30) v = 30;
+                rawSides[idx] = v;
+                [range1, range2, range3][idx].value = Math.min(25, v);
+                updateSimulation();
+            });
+        });
+
+        toggleRightRef.addEventListener('change', drawCanvas);
+        toggleSquares.addEventListener('change', drawCanvas);
+        toggleAngle.addEventListener('change', drawCanvas);
+
+        // Rejim keçidləri
+        tabExplore.addEventListener('click', () => {
+            mode = 'explore';
+            tabExplore.className = "px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow transition";
+            tabQuiz.className = "px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition";
+            explorePanel.classList.remove('hidden');
+            quizPanel.classList.add('hidden');
+            toggleAngle.checked = true;
+            updateSimulation();
+        });
+
+        tabQuiz.addEventListener('click', () => {
+            mode = 'quiz';
+            tabQuiz.className = "px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow transition";
+            tabExplore.className = "px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition";
+            quizPanel.classList.remove('hidden');
+            explorePanel.classList.add('hidden');
+            generateQuiz();
+        });
+
+        // Riyazi Analiz Funksiyası
+        function analyzeTriangle(sidesInput) {
+            const sorted = [...sidesInput].sort((x, y) => x - y);
+            const [a, b, c] = sorted;
+
+            if (a + b <= c) {
+                return {
+                    valid: false,
+                    a, b, c,
+                    type: 'invalid'
+                };
+            }
+
+            const a2 = +(a * a).toFixed(2);
+            const b2 = +(b * b).toFixed(2);
+            const sumSq = +(a2 + b2).toFixed(2);
+            const c2 = +(c * c).toFixed(2);
+
+            const cosC = (a2 + b2 - c2) / (2 * a * b);
+            const angleCDeg = Math.acos(Math.max(-1, Math.min(1, cosC))) * (180 / Math.PI);
+
+            let type = 'right';
+            if (Math.abs(c2 - sumSq) < 0.001) {
+                type = 'right';
+            } else if (c2 < sumSq) {
+                type = 'acute';
+            } else {
+                type = 'obtuse';
+            }
+
+            return {
+                valid: true,
+                a, b, c,
+                a2, b2, sumSq, c2,
+                angleC: angleCDeg,
+                type
+            };
+        }
+
+        // Sağ Panel və İzahların Yenilənməsi
+        function updateSimulation() {
+            const activeSides = mode === 'explore' ? rawSides : quizQuestion.sides;
+            const info = analyzeTriangle(activeSides);
+
+            if (mode === 'explore') {
+                renderCalculationBox(info);
+            }
+            renderVisualHint(info);
+            drawCanvas();
+        }
+
+        function renderCalculationBox(info) {
+            const { a, b, c } = info;
+            
+            if (!info.valid) {
+                calculationBox.innerHTML = `
+                    <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
+                        <div class="text-xs font-bold text-rose-700 uppercase">Addım 1: Üçbucaq Bərabərsizliyi</div>
+                        <p class="text-sm text-rose-900">
+                            Kiçik tərəflərin cəmi: <strong>${a} + ${b} = ${a + b}</strong><br>
+                            Ən böyük tərəf: <strong>c = ${c}</strong>
+                        </p>
+                        <div class="p-2.5 bg-rose-600 text-white rounded-lg font-bold text-center text-sm">
+                            ${a} + ${b} ≤ ${c} olduğu üçün üçbucaq qurulmur!
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const { a2, b2, sumSq, c2, type, angleC } = info;
+            
+            let sign = '=';
+            let badgeClass = 'bg-blue-600 text-white';
+            let resultTitle = 'Düzbucaqlı üçbucaqdır';
+            let ruleText = 'c² = a² + b² (Pifaqor teoremi ödənir)';
+
+            if (type === 'acute') {
+                sign = '<';
+                badgeClass = 'bg-emerald-600 text-white';
+                resultTitle = 'İti bucaqlı üçbucaqdır';
+                ruleText = 'c² < a² + b² (Ən böyük bucaq 90°-dən kiçikdir)';
+            } else if (type === 'obtuse') {
+                sign = '>';
+                badgeClass = 'bg-amber-600 text-white';
+                resultTitle = 'Kor bucaqlı üçbucaqdır';
+                ruleText = 'c² > a² + b² (Ən böyük bucaq 90°-dən böyükdür)';
+            }
+
+            calculationBox.innerHTML = `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 text-sm">
+                    <div class="flex items-center justify-between text-xs text-slate-500 border-b border-slate-200 pb-1.5">
+                        <span>Sıralama: <strong>a = ${a}, b = ${b}</strong></span>
+                        <span class="text-rose-600 font-bold">Ən böyük: c = ${c}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-center">
+                        <div class="bg-white p-2 rounded-lg border border-slate-200">
+                            <div class="text-[11px] text-slate-400">Ən böyük tərəf (c²)</div>
+                            <div class="font-bold text-rose-600 text-base">${c}² = ${c2}</div>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg border border-slate-200">
+                            <div class="text-[11px] text-slate-400">Digər iki tərəf (a² + b²)</div>
+                            <div class="font-bold text-indigo-600 text-base">${a}² + ${b}² = ${sumSq}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-center font-extrabold text-lg tracking-wide text-slate-800">
+                        ${c2} <span class="px-2 py-0.5 rounded bg-slate-100 text-indigo-700">${sign}</span> ${sumSq}
+                    </div>
+
+                    <div class="p-3 rounded-xl ${badgeClass} text-center shadow-sm">
+                        <div class="font-bold text-base">${resultTitle}</div>
+                        <div class="text-xs opacity-90 mt-0.5">${ruleText} • Böyük bucaq ≈ ${angleC.toFixed(1)}°</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVisualHint(info) {
+            if (mode === 'quiz' && !quizQuestion.answered) {
+                visualHint.innerHTML = `<strong>Tapşırıq:</strong> Sağdakı tərəflər üçün <strong>c²</strong> ilə <strong>a² + b²</strong> cəmini müqayisə edin və düzgün variantı seçin. Cavabdan sonra qırıq xətli düzbucaqlı müqayisəsi açılacaq.`;
+                return;
+            }
+
+            if (!info.valid) {
+                visualHint.innerHTML = `<strong>Vizual izah:</strong> Kiçik tərəflər (<strong>a = ${info.a}</strong> və <strong>b = ${info.b}</strong>) aşağı əyilsə belə, ucları bir-birinə çatmır, çünki onların cəmi (${info.a + info.b}) oturacaqdan (<strong>c = ${info.c}</strong>) böyük deyil.`;
+                return;
+            }
+
+            if (info.type === 'right') {
+                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Verilmiş üçbucaq qırıq xətli ideal düzbucaqlı üçbucaqla <strong>tam üst-üstə düşür</strong>. Hipotenuz <strong>c = ${info.c}</strong> olduğu üçün təpə bucağı düz <strong>90°</strong>-dir.`;
+            } else if (info.type === 'acute') {
+                const idealHyp = Math.sqrt(info.sumSq).toFixed(2);
+                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Düzbucaq (90°) olması üçün 3-cü tərəf <strong>${idealHyp}</strong> olmalı idi (qırıq xətt). Bizim tərəf (<strong>c = ${info.c}</strong>) daha qısa olduğu üçün bucaq <strong>içəri sıxılıb</strong> (&lt; 90°).`;
+            } else {
+                const idealHyp = Math.sqrt(info.sumSq).toFixed(2);
+                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Düzbucaq (90°) olması üçün 3-cü tərəf <strong>${idealHyp}</strong> olmalı idi (qırıq xətt). Bizim tərəf (<strong>c = ${info.c}</strong>) daha uzun olduğu üçün bucaq <strong>çölə açılıb</strong> (&gt; 90°).`;
+            }
+        }
+
+        // Kvadrat sahə çəkmək üçün köməkçi funksiya (P1 -> P2 tərəfinin xaricinə)
+        function drawSideSquare(x1, y1, x2, y2, areaVal, fillColor, strokeColor, textColor) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            // Xaricə doğru normal vektor (saat əqrəbinin əksinə/istiqamətinə görə)
+            const nx = -dy;
+            const ny = dx;
+
+            const x3 = x2 + nx;
+            const y3 = y2 + ny;
+            const x4 = x1 + nx;
+            const y4 = y1 + ny;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x3, y3);
+            ctx.lineTo(x4, y4);
+            ctx.closePath();
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Sahə yazısı kvadratın mərkəzində
+            const cx = (x1 + x2 + x3 + x4) / 4;
+            const cy = (y1 + y2 + y3 + y4) / 4;
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(areaVal, cx, cy);
+            ctx.restore();
+        }
+
+        // KANVAS ÇƏKİMİ
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawCanvas();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const W = rect.width;
+            const H = rect.height;
+            ctx.clearRect(0, 0, W, H);
+
+            if (mode === 'quiz' && !quizQuestion.answered) {
+                ctx.fillStyle = '#64748b';
+                ctx.font = '600 15px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Əvvəlcə Pifaqor teoremi ilə hesablayıb variantı seçin', W / 2, H / 2 - 10);
+                ctx.font = '400 13px Inter, sans-serif';
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText('Cavabdan sonra üçbucaq və düzbucaqlı müqayisəsi görünəcək', W / 2, H / 2 + 15);
+                return;
+            }
+
+            const activeSides = mode === 'explore' ? rawSides : quizQuestion.sides;
+            const info = analyzeTriangle(activeSides);
+            const { a, b, c } = info;
+
+            // Kvadratlar açıqdırsa miqyası bir az kiçildirik ki, kənarlara sığsın
+            const factor = toggleSquares.checked ? 0.36 : 0.62;
+            const scale = Math.min(W * factor, H * factor) / Math.max(a, b, c * 0.85);
+
+            const Cx = toggleSquares.checked ? W * 0.38 : W * 0.32;
+            const Cy = toggleSquares.checked ? H * 0.62 : H * 0.74;
+            const Ax = Cx + b * scale;
+            const Ay = Cy;
+
+            // Qırıq xətli İDEAL DÜZBUCAQLI ÜÇBUCAQ
+            const B_right_x = Cx;
+            const B_right_y = Cy - a * scale;
+
+            if (toggleRightRef.checked) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(Cx, Cy);
+                ctx.lineTo(B_right_x, B_right_y);
+                ctx.lineTo(Ax, Ay);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.08)';
+                ctx.fill();
+
+                ctx.setLineDash([7, 5]);
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const sq = Math.min(16, a * scale * 0.25, b * scale * 0.25);
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([3, 3]);
+                ctx.strokeRect(Cx, Cy - sq, sq, sq);
+                ctx.setLineDash([]);
+
+                const idealC = Math.sqrt(a * a + b * b).toFixed(1);
+                ctx.fillStyle = '#64748b';
+                ctx.font = '500 11px Inter, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`90° üçün c = ${idealC}`, (B_right_x + Ax) / 2 + 8, (B_right_y + Ay) / 2 - 6);
+                ctx.restore();
+            }
+
+            if (!info.valid) {
+                const Bx = Cx - a * scale;
+                const By = Cy;
+
+                ctx.beginPath();
+                ctx.moveTo(Bx, By);
+                ctx.lineTo(Cx, Cy);
+                ctx.lineTo(Ax, Ay);
+                ctx.strokeStyle = '#e11d48';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                [ [Bx, By], [Cx, Cy], [Ax, Ay] ].forEach(([px, py]) => {
+                    ctx.beginPath();
+                    ctx.arc(px, py, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#e11d48';
+                    ctx.fill();
+                });
+
+                ctx.fillStyle = '#e11d48';
+                ctx.font = 'bold 14px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`a + b = ${a + b} ≤ ${c} (Uclar birləşmir!)`, W / 2, H * 0.35);
+                return;
+            }
+
+            const angleRad = (info.angleC * Math.PI) / 180;
+            const Bx = Cx + a * scale * Math.cos(angleRad);
+            const By = Cy - a * scale * Math.sin(angleRad);
+
+            // Tərəflərin xaricinə kvadrat sahələrin çəkilməsi
+            if (toggleSquares.checked) {
+                // b tərəfi (C -> A): aşağıya doğru kvadrat
+                drawSideSquare(Cx, Cy, Ax, Ay, `b² = ${info.b2}`, 'rgba(99, 102, 241, 0.12)', 'rgba(99, 102, 241, 0.5)', '#4338ca');
+                // a tərəfi (B -> C): sola doğru kvadrat
+                drawSideSquare(Bx, By, Cx, Cy, `a² = ${info.a2}`, 'rgba(99, 102, 241, 0.12)', 'rgba(99, 102, 241, 0.5)', '#4338ca');
+                // c tərəfi (A -> B): yuxarı-sağa doğru kvadrat
+                drawSideSquare(Ax, Ay, Bx, By, `c² = ${info.c2}`, 'rgba(225, 29, 72, 0.12)', 'rgba(225, 29, 72, 0.5)', '#be123c');
+            }
+
+            let mainColor = '#2563eb';
+            let fillColor = 'rgba(37, 99, 235, 0.12)';
+            if (info.type === 'acute') {
+                mainColor = '#059669';
+                fillColor = 'rgba(5, 150, 105, 0.12)';
+            } else if (info.type === 'obtuse') {
+                mainColor = '#d97706';
+                fillColor = 'rgba(217, 119, 6, 0.12)';
+            }
+
+            if (toggleRightRef.checked && info.type !== 'right') {
+                ctx.save();
+                ctx.beginPath();
+                const startA = -Math.PI / 2;
+                const endA = -angleRad;
+                ctx.arc(Cx, Cy, a * scale, Math.min(startA, endA), Math.max(startA, endA));
+                ctx.strokeStyle = mainColor;
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([3, 3]);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(Cx, Cy);
+            ctx.lineTo(Bx, By);
+            ctx.lineTo(Ax, Ay);
+            ctx.closePath();
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(Bx, By);
+            ctx.lineTo(Cx, Cy);
+            ctx.lineTo(Ax, Ay);
+            ctx.strokeStyle = mainColor;
+            ctx.lineWidth = 3.5;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(Bx, By);
+            ctx.lineTo(Ax, Ay);
+            ctx.strokeStyle = '#e11d48';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            if (toggleAngle.checked) {
+                const arcR = Math.min(34, a * scale * 0.35, b * scale * 0.35);
+                if (info.type === 'right') {
+                    const sq = Math.min(16, arcR * 0.6);
+                    ctx.strokeStyle = mainColor;
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeRect(Cx, Cy - sq, sq, sq);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(Cx, Cy, arcR, -angleRad, 0);
+                    ctx.strokeStyle = mainColor;
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                }
+
+                const midA = -angleRad / 2;
+                const lx = Cx + (arcR + 22) * Math.cos(midA);
+                const ly = Cy + (arcR + 22) * Math.sin(midA);
+                ctx.fillStyle = mainColor;
+                ctx.font = 'bold 13px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${info.angleC.toFixed(1)}°`, lx, ly);
+            }
+
+            ctx.font = 'bold 13px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.fillStyle = '#1e293b';
+            ctx.fillText(`b = ${b}`, (Cx + Ax) / 2, Cy + 16);
+
+            const aMidX = (Cx + Bx) / 2 - 22;
+            const aMidY = (Cy + By) / 2;
+            ctx.fillText(`a = ${a}`, aMidX, aMidY);
+
+            ctx.fillStyle = '#e11d48';
+            const cMidX = (Bx + Ax) / 2 + 18;
+            const cMidY = (By + Ay) / 2 - 12;
+            ctx.fillText(`c = ${c}`, cMidX, cMidY);
+        }
+
+        // QUIZ FUNKSİYALARI
+        function generateQuiz() {
+            const pool = [
+                [3, 4, 5], [5, 12, 13], [8, 15, 17], [6, 8, 10],
+                [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 10],
+                [3, 5, 7], [4, 6, 9], [5, 7, 10], [6, 8, 11],
+                [2, 4, 7], [3, 5, 8], [4, 5, 10], [3, 6, 9]
+            ];
+            const chosen = pool[Math.floor(Math.random() * pool.length)];
+            const shuffled = [...chosen].sort(() => Math.random() - 0.5);
+            const info = analyzeTriangle(shuffled);
+
+            quizQuestion = {
+                sides: shuffled,
+                type: info.type,
+                answered: false
+            };
+
+            document.getElementById('quizSidesDisplay').textContent = 
+                `${shuffled[0]},  ${shuffled[1]},  ${shuffled[2]}`;
+            document.getElementById('quizFeedback').classList.add('hidden');
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+            
+            document.querySelectorAll('.quiz-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.className = "quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between";
+            });
+
+            updateSimulation();
+        }
+
+        function checkQuizAnswer(selectedType) {
+            if (quizQuestion.answered) return;
+            quizQuestion.answered = true;
+
+            const isCorrect = selectedType === quizQuestion.type;
+            if (isCorrect) {
+                quizScore++;
+                document.getElementById('quizScore').textContent = quizScore;
+            }
+            quizNumber++;
+            document.getElementById('quizCount').textContent = quizNumber;
+
+            const info = analyzeTriangle(quizQuestion.sides);
+            const fb = document.getElementById('quizFeedback');
+            fb.classList.remove('hidden');
+
+            let explanation = '';
+            if (!info.valid) {
+                explanation = `<strong>İzah:</strong> Ən böyük tərəf <strong>${info.c}</strong>-dir. Digər iki tərəfin cəmi <strong>${info.a} + ${info.b} = ${info.a + info.b} ≤ ${info.c}</strong> (üçbucaq bərabərsizliyi ödənmir) olduğu üçün belə üçbucaq qurula bilməz.`;
+            } else {
+                const sign = info.type === 'right' ? '=' : (info.type === 'acute' ? '<' : '>');
+                const typeName = info.type === 'right' ? 'düzbucaqlı' : (info.type === 'acute' ? 'iti bucaqlı' : 'kor bucaqlı');
+                explanation = `<strong>İzah:</strong> Ən böyük tərəf <strong>c = ${info.c}</strong>-dir.<br>
+                • c² = ${info.c}² = <strong>${info.c2}</strong><br>
+                • a² + b² = ${info.a}² + ${info.b}² = ${info.a2} + ${info.b2} = <strong>${info.sumSq}</strong><br>
+                <strong>${info.c2} ${sign} ${info.sumSq}</strong> (c² ${sign} a² + b²) olduğu üçün bu üçbucaq <strong>${typeName}</strong> üçbucaqdır.`;
+            }
+
+            if (isCorrect) {
+                fb.className = "p-4 rounded-xl text-sm border bg-emerald-50 border-emerald-200 text-emerald-900 space-y-1.5 leading-relaxed";
+                fb.innerHTML = `<div class="font-bold text-emerald-700 text-base">✓ Doğrudur!</div><div>${explanation}</div>`;
+            } else {
+                fb.className = "p-4 rounded-xl text-sm border bg-rose-50 border-rose-200 text-rose-900 space-y-1.5 leading-relaxed";
+                fb.innerHTML = `<div class="font-bold text-rose-700 text-base">✕ Yanlışdır</div><div>${explanation}</div>`;
+            }
+
+            document.querySelectorAll('.quiz-btn').forEach(btn => btn.disabled = true);
+            document.getElementById('nextQuizBtn').classList.remove('hidden');
+
+            updateSimulation();
+        }
+
+        // Başlanğıc
+        window.onload = () => {
+            resizeCanvas();
+            updateSimulation();
+        };
+    </script>
+</body>
+</html>
