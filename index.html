@@ -92,7 +92,7 @@
                         </div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-4 h-0 border-t-2 border-dashed border-slate-400 inline-block"></span>
-                            <span>İdeal düzbucaqlı üçbucaq</span>
+                            <span>Düzbucaqlı üçbucaq</span>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                                 6, 8, 12<br><span class="text-[10px] font-normal">Kor bucaqlı</span>
                             </button>
                             <button onclick="setSides(4, 5, 10)" class="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition">
-                                4, 5, 10<br><span class="text-[10px] font-normal">Qurulmur</span>
+                                4, 5, 10<br><span class="text-[10px] font-normal">Belə üçbucaq mövcud deyil</span>
                             </button>
                         </div>
                     </div>
@@ -182,19 +182,19 @@
                         </div>
                     </div>
 
-                    <!-- 4 Cavab Variantı -->
+                    <!-- 4 Cavab Variantı (Mötərizəsiz) -->
                     <div class="grid grid-cols-1 gap-2" id="quizOptions">
                         <button onclick="checkQuizAnswer('acute')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
-                            <span>1. İti bucaqlı üçbucaq</span>
+                            <span>İti bucaqlı üçbucaq</span>
                         </button>
                         <button onclick="checkQuizAnswer('right')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
-                            <span>2. Düzbucaqlı üçbucaq</span>
+                            <span>Düzbucaqlı üçbucaq</span>
                         </button>
                         <button onclick="checkQuizAnswer('obtuse')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
-                            <span>3. Kor bucaqlı üçbucaq</span>
+                            <span>Kor bucaqlı üçbucaq</span>
                         </button>
                         <button onclick="checkQuizAnswer('invalid')" class="quiz-btn w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 font-semibold text-sm transition flex items-center justify-between">
-                            <span>4. Belə üçbucaq qurula bilməz</span>
+                            <span>Belə üçbucaq mövcud deyil</span>
                         </button>
                     </div>
 
@@ -391,7 +391,7 @@
                             Ən böyük tərəf: <strong>c = ${c}</strong>
                         </p>
                         <div class="p-2.5 bg-rose-600 text-white rounded-lg font-bold text-center text-sm">
-                            ${a} + ${b} ≤ ${c} olduğu üçün üçbucaq qurulmur!
+                            ${a} + ${b} ≤ ${c} olduğu üçün belə üçbucaq mövcud deyil!
                         </div>
                     </div>
                 `;
@@ -454,18 +454,18 @@
             }
 
             if (!info.valid) {
-                visualHint.innerHTML = `<strong>Vizual izah:</strong> Kiçik tərəflər (<strong>a = ${info.a}</strong> və <strong>b = ${info.b}</strong>) aşağı əyilsə belə, ucları bir-birinə çatmır, çünki onların cəmi (${info.a + info.b}) oturacaqdan (<strong>c = ${info.c}</strong>) böyük deyil.`;
+                visualHint.innerHTML = `<strong>Vizual izah:</strong> Kiçik tərəflər (<strong>a = ${info.a}</strong> və <strong>b = ${info.b}</strong>) aşağı əyilsə belə, ucları bir-birinə çatmır, çünki onların cəmi (${info.a + info.b}) oturacaqdan (<strong>c = ${info.c}</strong>) böyük deyil. Belə üçbucaq mövcud deyil.`;
                 return;
             }
 
             if (info.type === 'right') {
-                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Verilmiş üçbucaq qırıq xətli ideal düzbucaqlı üçbucaqla <strong>tam üst-üstə düşür</strong>. Hipotenuz <strong>c = ${info.c}</strong> olduğu üçün təpə bucağı düz <strong>90°</strong>-dir.`;
+                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Verilmiş üçbucaq qırıq xətli düzbucaqlı üçbucaqla <strong>tam üst-üstə düşür</strong>. Hipotenuz <strong>c = ${info.c}</strong> olduğu üçün təpə bucağı düz <strong>90°</strong>-dir.`;
             } else if (info.type === 'acute') {
                 const idealHyp = Math.sqrt(info.sumSq).toFixed(2);
-                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Düzbucaq (90°) olması üçün 3-cü tərəf <strong>${idealHyp}</strong> olmalı idi (qırıq xətt). Bizim tərəf (<strong>c = ${info.c}</strong>) daha qısa olduğu üçün bucaq <strong>içəri sıxılıb</strong> (&lt; 90°).`;
+                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Düzbucaq (90°) olması üçün 3-cü tərəf <strong>${idealHyp}</strong> olmalı idi (qırıq xətt). Bizim tərəf (<strong>c = ${info.c}</strong>) daha qısa olduğu üçün bucaq <strong>düz bucaqdan kiçik açılır</strong> (&lt; 90°).`;
             } else {
                 const idealHyp = Math.sqrt(info.sumSq).toFixed(2);
-                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Düzbucaq (90°) olması üçün 3-cü tərəf <strong>${idealHyp}</strong> olmalı idi (qırıq xətt). Bizim tərəf (<strong>c = ${info.c}</strong>) daha uzun olduğu üçün bucaq <strong>çölə açılıb</strong> (&gt; 90°).`;
+                visualHint.innerHTML = `<strong>Vizual müqayisə:</strong> Düzbucaq (90°) olması üçün 3-cü tərəf <strong>${idealHyp}</strong> olmalı idi (qırıq xətt). Bizim tərəf (<strong>c = ${info.c}</strong>) daha uzun olduğu üçün bucaq <strong>düz bucaqdan böyük açılır</strong> (&gt; 90°).`;
             }
         }
 
@@ -473,7 +473,6 @@
         function drawSideSquare(x1, y1, x2, y2, areaVal, fillColor, strokeColor, textColor) {
             const dx = x2 - x1;
             const dy = y2 - y1;
-            // Xaricə doğru normal vektor (saat əqrəbinin əksinə/istiqamətinə görə)
             const nx = -dy;
             const ny = dx;
 
@@ -495,7 +494,6 @@
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // Sahə yazısı kvadratın mərkəzində
             const cx = (x1 + x2 + x3 + x4) / 4;
             const cy = (y1 + y2 + y3 + y4) / 4;
             ctx.fillStyle = textColor;
@@ -539,7 +537,6 @@
             const info = analyzeTriangle(activeSides);
             const { a, b, c } = info;
 
-            // Kvadratlar açıqdırsa miqyası bir az kiçildirik ki, kənarlara sığsın
             const factor = toggleSquares.checked ? 0.36 : 0.62;
             const scale = Math.min(W * factor, H * factor) / Math.max(a, b, c * 0.85);
 
@@ -548,7 +545,7 @@
             const Ax = Cx + b * scale;
             const Ay = Cy;
 
-            // Qırıq xətli İDEAL DÜZBUCAQLI ÜÇBUCAQ
+            // Qırıq xətli DÜZBUCAQLI ÜÇBUCAQ
             const B_right_x = Cx;
             const B_right_y = Cy - a * scale;
 
@@ -575,11 +572,7 @@
                 ctx.strokeRect(Cx, Cy - sq, sq, sq);
                 ctx.setLineDash([]);
 
-                const idealC = Math.sqrt(a * a + b * b).toFixed(1);
-                ctx.fillStyle = '#64748b';
-                ctx.font = '500 11px Inter, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(`90° üçün c = ${idealC}`, (B_right_x + Ax) / 2 + 8, (B_right_y + Ay) / 2 - 6);
+                // c yazısı silindi
                 ctx.restore();
             }
 
@@ -605,7 +598,7 @@
                 ctx.fillStyle = '#e11d48';
                 ctx.font = 'bold 14px Inter, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(`a + b = ${a + b} ≤ ${c} (Uclar birləşmir!)`, W / 2, H * 0.35);
+                ctx.fillText(`Belə üçbucaq mövcud deyil (a + b = ${a + b} ≤ ${c})`, W / 2, H * 0.35);
                 return;
             }
 
@@ -613,13 +606,9 @@
             const Bx = Cx + a * scale * Math.cos(angleRad);
             const By = Cy - a * scale * Math.sin(angleRad);
 
-            // Tərəflərin xaricinə kvadrat sahələrin çəkilməsi
             if (toggleSquares.checked) {
-                // b tərəfi (C -> A): aşağıya doğru kvadrat
                 drawSideSquare(Cx, Cy, Ax, Ay, `b² = ${info.b2}`, 'rgba(99, 102, 241, 0.12)', 'rgba(99, 102, 241, 0.5)', '#4338ca');
-                // a tərəfi (B -> C): sola doğru kvadrat
                 drawSideSquare(Bx, By, Cx, Cy, `a² = ${info.a2}`, 'rgba(99, 102, 241, 0.12)', 'rgba(99, 102, 241, 0.5)', '#4338ca');
-                // c tərəfi (A -> B): yuxarı-sağa doğru kvadrat
                 drawSideSquare(Ax, Ay, Bx, By, `c² = ${info.c2}`, 'rgba(225, 29, 72, 0.12)', 'rgba(225, 29, 72, 0.5)', '#be123c');
             }
 
@@ -761,14 +750,14 @@
 
             let explanation = '';
             if (!info.valid) {
-                explanation = `<strong>İzah:</strong> Ən böyük tərəf <strong>${info.c}</strong>-dir. Digər iki tərəfin cəmi <strong>${info.a} + ${info.b} = ${info.a + info.b} ≤ ${info.c}</strong> (üçbucaq bərabərsizliyi ödənmir) olduğu üçün belə üçbucaq qurula bilməz.`;
+                explanation = `<strong>İzah:</strong> Ən böyük tərəf <strong>${info.c}</strong>-dir. Digər iki tərəfin cəmi <strong>${info.a} + ${info.b} = ${info.a + info.b} ≤ ${info.c}</strong> (üçbucaq bərabərsizliyi ödənmir) olduğu üçün belə üçbucaq mövcud deyil.`;
             } else {
                 const sign = info.type === 'right' ? '=' : (info.type === 'acute' ? '<' : '>');
-                const typeName = info.type === 'right' ? 'düzbucaqlı' : (info.type === 'acute' ? 'iti bucaqlı' : 'kor bucaqlı');
+                const typeName = info.type === 'right' ? 'düzbucaqlı üçbucaq' : (info.type === 'acute' ? 'iti bucaqlı üçbucaq' : 'kor bucaqlı üçbucaq');
                 explanation = `<strong>İzah:</strong> Ən böyük tərəf <strong>c = ${info.c}</strong>-dir.<br>
                 • c² = ${info.c}² = <strong>${info.c2}</strong><br>
                 • a² + b² = ${info.a}² + ${info.b}² = ${info.a2} + ${info.b2} = <strong>${info.sumSq}</strong><br>
-                <strong>${info.c2} ${sign} ${info.sumSq}</strong> (c² ${sign} a² + b²) olduğu üçün bu üçbucaq <strong>${typeName}</strong> üçbucaqdır.`;
+                <strong>${info.c2} ${sign} ${info.sumSq}</strong> (c² ${sign} a² + b²) olduğu üçün bu üçbucaq <strong>${typeName}</strong>-dir.`;
             }
 
             if (isCorrect) {
